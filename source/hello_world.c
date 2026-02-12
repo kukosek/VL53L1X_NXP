@@ -10,6 +10,8 @@
 #include "fsl_debug_console.h"
 #include "board.h"
 #include "app.h"
+#include "VL53L1X_api.h"
+#include "VL53L1X_calibration.h"
 #include <stdio.h>
 
 /*******************************************************************************
