@@ -20,6 +20,10 @@
    </preferences>
    <tools>
       <pins name="Pins" version="17.0" enabled="true" update_project_code="true">
+         <generated_project_files>
+            <file path="board/pin_mux.c" update_enabled="true"/>
+            <file path="board/pin_mux.h" update_enabled="true"/>
+         </generated_project_files>
          <pins_profile>
             <processor_version>25.06.10</processor_version>
          </pins_profile>
@@ -38,6 +42,11 @@
                      </feature>
                   </dependency>
                   <dependency resourceType="Peripheral" resourceId="SWD" description="Peripheral SWD signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
+                     <feature name="initialized" evaluation="equal">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="Peripheral" resourceId="LP_FLEXCOMM2" description="Peripheral LP_FLEXCOMM2 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
                      <feature name="initialized" evaluation="equal">
                         <data>true</data>
                      </feature>
@@ -90,11 +99,17 @@
                         <pin_feature name="invert_input" value="normal"/>
                      </pin_features>
                   </pin>
+                  <pin peripheral="LP_FLEXCOMM2" signal="LPFLEXCOMM_P1" pin_num="P2" pin_signal="PIO4_1/TRIG_IN7/FC2_P1/CT_INP17/SMARTDMA_PIO25/PLU_IN1"/>
+                  <pin peripheral="LP_FLEXCOMM2" signal="LPFLEXCOMM_P0" pin_num="P1" pin_signal="PIO4_0/WUU0_IN18/TRIG_IN6/FC2_P0/CT_INP16/SMARTDMA_PIO24/PLU_IN0/SINC0_MCLK3"/>
                </pins>
             </function>
          </functions_list>
       </pins>
       <clocks name="Clocks" version="17.0" enabled="true" update_project_code="true">
+         <generated_project_files>
+            <file path="board/clock_config.c" update_enabled="true"/>
+            <file path="board/clock_config.h" update_enabled="true"/>
+         </generated_project_files>
          <clocks_profile>
             <processor_version>25.06.10</processor_version>
          </clocks_profile>
@@ -305,6 +320,7 @@
                <clock_outputs>
                   <clock_output id="CLK_144M_clock.outFreq" value="144 MHz" locked="false" accuracy=""/>
                   <clock_output id="CLK_48M_clock.outFreq" value="48 MHz" locked="false" accuracy=""/>
+                  <clock_output id="FLEXCOMM2_clock.outFreq" value="12 MHz" locked="false" accuracy=""/>
                   <clock_output id="FRO_12M_clock.outFreq" value="12 MHz" locked="false" accuracy=""/>
                   <clock_output id="FRO_HF_clock.outFreq" value="48 MHz" locked="false" accuracy=""/>
                   <clock_output id="MAIN_clock.outFreq" value="150 MHz" locked="false" accuracy=""/>
@@ -318,10 +334,12 @@
                   <setting id="PLL0_Mode" value="Normal" locked="false"/>
                   <setting id="RunPowerMode" value="OD" locked="false"/>
                   <setting id="SCGMode" value="PLL0" locked="false"/>
+                  <setting id="FLEXCOMM2CLKDIV_HALT" value="Enable" locked="false"/>
                   <setting id="SCG.PLL0M_MULT.scale" value="50" locked="true"/>
                   <setting id="SCG.PLL0SRCSEL.sel" value="SCG.FIRC_48M" locked="false"/>
                   <setting id="SCG.PLL0_NDIV.scale" value="8" locked="true"/>
                   <setting id="SCG.SCSSEL.sel" value="SCG.PLL0_CLK" locked="false"/>
+                  <setting id="SYSCON.FCCLKSEL2.sel" value="SCG.FRO_12M" locked="false"/>
                   <setting id="SYSCON.FLEXSPICLKSEL.sel" value="NO_CLOCK" locked="false"/>
                   <setting id="SYSCON.FREQMEREFCLKSEL.sel" value="SYSCON.evtg_out0a" locked="false"/>
                   <setting id="SYSCON.FREQMETARGETCLKSEL.sel" value="SYSCON.evtg_out0a" locked="false"/>
@@ -407,6 +425,7 @@
          </clock_configurations>
       </clocks>
       <dcdx name="DCDx" version="4.0" enabled="false" update_project_code="true">
+         <generated_project_files/>
          <dcdx_profile>
             <processor_version>N/A</processor_version>
          </dcdx_profile>
@@ -430,6 +449,10 @@
                </feature>
             </dependency>
          </dependencies>
+         <generated_project_files>
+            <file path="board/peripherals.c" update_enabled="true"/>
+            <file path="board/peripherals.h" update_enabled="true"/>
+         </generated_project_files>
          <peripherals_profile>
             <processor_version>25.06.10</processor_version>
          </peripherals_profile>
@@ -448,14 +471,9 @@
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="LP_FLEXCOMM4.lpi2c_scl" description="Signal serial clock is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
-                     <feature name="routed" evaluation="">
-                        <data type="Boolean">true</data>
-                     </feature>
-                  </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="LP_FLEXCOMM4.lpi2c_sda" description="Signal serial data is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
-                     <feature name="routed" evaluation="">
-                        <data type="Boolean">true</data>
+                  <dependency resourceType="ClockOutput" resourceId="FLEXCOMM2_clock" description="FLEXCOMM2CLK is inactive." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
                </dependencies>
@@ -591,7 +609,7 @@
                         <setting name="lpi2c_mode" value="master"/>
                         <struct name="clock_configuration">
                            <setting name="clockSource" value="LPFLEXCOMMFunctionClock"/>
-                           <setting name="clockSourceFreq" value="custom:400000"/>
+                           <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
                         </struct>
                         <struct name="master_config">
                            <setting name="enableMaster" value="true"/>
@@ -599,7 +617,7 @@
                            <setting name="debugEnable" value="false"/>
                            <setting name="ignoreAck" value="false"/>
                            <setting name="pinConfig" value="kLPI2C_2PinOpenDrain"/>
-                           <setting name="baudRate_Hz" value="100000"/>
+                           <setting name="baudRate_Hz" value="400000"/>
                            <struct name="realBaudRateCount"/>
                            <setting name="busIdleTimeout_ns" value="0"/>
                            <setting name="pinLowTimeout_ns" value="0"/>
@@ -618,7 +636,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="LP_FLEXCOMM4" uuid="0659c75b-efc5-4591-b700-762d003fa785" type="lpflexcomm_lpi2c" type_id="lpflexcomm_lpi2c_2.1.1" mode="polling" peripheral="LP_FLEXCOMM4" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
+                  <instance name="LP_FLEXCOMM4" uuid="0659c75b-efc5-4591-b700-762d003fa785" type="lpflexcomm_lpi2c" type_id="lpflexcomm_lpi2c_2.1.1" mode="polling" peripheral="LP_FLEXCOMM4" enabled="false" comment="" custom_name_enabled="false" editing_lock="false">
                      <config_set name="generalCfg">
                         <setting name="lpi2c_mode" value="master"/>
                         <struct name="clock_configuration">
@@ -646,6 +664,34 @@
                            <struct name="lpi2c_dma_master_struct_t">
                               <setting name="DMATxEnable" value="true"/>
                               <setting name="DMARxEnable" value="true"/>
+                           </struct>
+                        </struct>
+                        <struct name="slave_config">
+                           <setting name="enableSlave" value="false"/>
+                           <setting name="iAddress0" value="0"/>
+                           <setting name="iAddress1" value="0"/>
+                           <setting name="addressMatchMode" value="kLPI2C_MatchAddress0"/>
+                           <setting name="filterEnable" value="false"/>
+                           <setting name="filterDozeEnable" value="false"/>
+                           <setting name="enableGeneralCall" value="false"/>
+                           <struct name="sclStall">
+                              <setting name="enableAck" value="false"/>
+                              <setting name="enableTx" value="false"/>
+                              <setting name="enableRx" value="false"/>
+                              <setting name="enableAddress" value="false"/>
+                           </struct>
+                           <setting name="ignoreAck" value="false"/>
+                           <setting name="enableReceivedAddressRead" value="false"/>
+                           <struct name="slaveMaxMinValue"/>
+                           <setting name="sdaGlitchFilterWidth_ns" value="0"/>
+                           <setting name="sclGlitchFilterWidth_ns" value="0"/>
+                           <setting name="dataValidDelay_ns" value="0"/>
+                           <setting name="clockHoldTime_ns" value="0"/>
+                           <setting name="enable_dma_slave" value="false"/>
+                           <struct name="lpi2c_dma_slave_struct_t">
+                              <setting name="enableAddressValid" value="false"/>
+                              <setting name="DMATxEnable" value="false"/>
+                              <setting name="DMARxEnable" value="false"/>
                            </struct>
                         </struct>
                      </config_set>
@@ -682,6 +728,7 @@
          </components>
       </periphs>
       <tee name="TEE" version="9.0" enabled="false" update_project_code="true">
+         <generated_project_files/>
          <tee_profile>
             <processor_version>N/A</processor_version>
          </tee_profile>
