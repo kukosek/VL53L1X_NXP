@@ -42,10 +42,11 @@ int main(void)
     /* Init board hardware. */
     BOARD_InitHardware();
     BOARD_InitBootClocks();
+    BOARD_InitBootPeripherals();
 
     PRINTF("Hello world\r\n");
 
-    // LPI2C_MasterStart(LPI2C2, dev, kLPI2C_Write);
+    LPI2C_MasterStart(LPI2C2, dev, kLPI2C_Read);
 
     status = VL53L1_RdByte(dev, 0x010F, &byteData);
 	PRINTF("VL53L1X Model_ID: %X\r\n", byteData);
