@@ -13,12 +13,15 @@ package_id: MCXN947VDF
 mcu_data: ksdk2_0
 processor_version: 25.06.10
 board: FRDM-MCXN947
+pin_labels:
+- {pin_num: D7, pin_signal: PIO0_31/CT_INP3/ADC0_B23, label: 'P0_31/J1[16]', identifier: lidar_gpio;LIDAR_GPIO}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
 
 #include "fsl_common.h"
 #include "fsl_port.h"
+#include "fsl_gpio.h"
 #include "pin_mux.h"
 
 /* FUNCTION ************************************************************************************************************
@@ -30,6 +33,7 @@ board: FRDM-MCXN947
 void BOARD_InitBootPins(void)
 {
     BOARD_InitPins();
+    LIDAR_pins();
 }
 
 /* clang-format off */
@@ -47,6 +51,7 @@ BOARD_InitPins:
     pull_select: down, pull_enable: disable, input_buffer: enable, invert_input: normal}
   - {pin_num: P2, peripheral: LP_FLEXCOMM2, signal: LPFLEXCOMM_P1, pin_signal: PIO4_1/TRIG_IN7/FC2_P1/CT_INP17/SMARTDMA_PIO25/PLU_IN1}
   - {pin_num: P1, peripheral: LP_FLEXCOMM2, signal: LPFLEXCOMM_P0, pin_signal: PIO4_0/WUU0_IN18/TRIG_IN6/FC2_P0/CT_INP16/SMARTDMA_PIO24/PLU_IN0/SINC0_MCLK3}
+  - {pin_num: D7, peripheral: GPIO0, signal: 'GPIO, 31', pin_signal: PIO0_31/CT_INP3/ADC0_B23, identifier: LIDAR_GPIO, direction: INPUT, gpio_per_interrupt: kGPIO_InterruptRisingEdge}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -59,12 +64,24 @@ BOARD_InitPins:
  * END ****************************************************************************************************************/
 void BOARD_InitPins(void)
 {
+    /* Enables the clock for GPIO0: Enables clock */
+    CLOCK_EnableClock(kCLOCK_Gpio0);
     /* Enables the clock for PORT0 controller: Enables clock */
     CLOCK_EnableClock(kCLOCK_Port0);
     /* Enables the clock for PORT1: Enables clock */
     CLOCK_EnableClock(kCLOCK_Port1);
     /* Enables the clock for PORT4: Enables clock */
     CLOCK_EnableClock(kCLOCK_Port4);
+
+    gpio_pin_config_t LIDAR_GPIO_config = {
+        .pinDirection = kGPIO_DigitalInput,
+        .outputLogic = 0U
+    };
+    /* Initialize GPIO functionality on pin PIO0_31 (pin D7)  */
+    GPIO_PinInit(BOARD_INITPINS_LIDAR_GPIO_GPIO, BOARD_INITPINS_LIDAR_GPIO_PIN, &LIDAR_GPIO_config);
+
+    /* Interrupt configuration on GPIO0_31 (pin D7): Interrupt on rising edge */
+    GPIO_SetPinInterruptConfig(BOARD_INITPINS_LIDAR_GPIO_GPIO, BOARD_INITPINS_LIDAR_GPIO_PIN, kGPIO_InterruptRisingEdge);
 
     const port_pin_config_t DEBUG_SWD_SWO = {/* Internal pull-up/down resistor is disabled */
                                              .pullSelect = kPORT_PullDisable,
@@ -88,6 +105,16 @@ void BOARD_InitPins(void)
                                              .lockRegister = kPORT_UnlockRegister};
     /* PORT0_2 (pin B16) is configured as SWO */
     PORT_SetPinConfig(BOARD_INITPINS_DEBUG_SWD_SWO_PORT, BOARD_INITPINS_DEBUG_SWD_SWO_PIN, &DEBUG_SWD_SWO);
+
+    /* PORT0_31 (pin D7) is configured as PIO0_31 */
+    PORT_SetPinMux(BOARD_INITPINS_LIDAR_GPIO_PORT, BOARD_INITPINS_LIDAR_GPIO_PIN, kPORT_MuxAlt0);
+
+    PORT0->PCR[31] = ((PORT0->PCR[31] &
+                       /* Mask bits to zero which are setting */
+                       (~(PORT_PCR_IBE_MASK)))
+
+                      /* Input Buffer Enable: Enables. */
+                      | PORT_PCR_IBE(PCR_IBE_ibe1));
 
     const port_pin_config_t DEBUG_UART_RX = {/* Internal pull-up/down resistor is disabled */
                                              .pullSelect = kPORT_PullDisable,
@@ -154,6 +181,26 @@ void BOARD_InitPins(void)
 
                      /* Input Buffer Enable: Enables. */
                      | PORT_PCR_IBE(PCR_IBE_ibe1));
+}
+
+/* clang-format off */
+/*
+ * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+LIDAR_pins:
+- options: {callFromInitBoot: 'true', coreID: cm33_core0, enableClock: 'true'}
+- pin_list: []
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
+ */
+/* clang-format on */
+
+/* FUNCTION ************************************************************************************************************
+ *
+ * Function Name : LIDAR_pins
+ * Description   : Configures pin routing and optionally pin electrical features.
+ *
+ * END ****************************************************************************************************************/
+void LIDAR_pins(void)
+{
 }
 /***********************************************************************************************************************
  * EOF

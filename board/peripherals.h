@@ -11,6 +11,7 @@
  **********************************************************************************************************************/
 #include "fsl_common.h"
 #include "fsl_lpi2c.h"
+#include "fsl_gpio.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -27,6 +28,14 @@ extern "C" {
 #define LP_FLEXCOMM2_PERIPHERAL_BASE LPI2C2_BASE
 /* Definition of the clock source frequency */
 #define LP_FLEXCOMM2_CLOCK_SOURCE 12000000UL
+/* Alias for GPIO0 peripheral */
+#define GPIO0_GPIO GPIO0
+/* Alias for PORT0 */
+#define GPIO0_PORT PORT0
+/* GPIO0 interrupt vector ID (number). */
+#define GPIO0_INT_0_IRQN GPIO00_IRQn
+/* GPIO0 interrupt handler identifier. */
+#define GPIO0_INT_0_IRQHANDLER GPIO00_IRQHandler
 
 /***********************************************************************************************************************
  * Global variables

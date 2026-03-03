@@ -22,6 +22,24 @@ uint16_t dev=0x52;
 int status=0;
 volatile int IntCount;
 
+/* GPIO00_IRQn interrupt handler */
+void GPIO0_INT_0_IRQHANDLER(void) {
+  /* Get pin flags 0 */
+  uint32_t pin_flags0 = GPIO_GpioGetInterruptChannelFlags(GPIO0, 0U);
+
+  /* Place your interrupt code here */
+  IntCount++;
+
+  /* Clear pin flags 0 */
+  GPIO_GpioClearInterruptChannelFlags(GPIO0, pin_flags0, 0U);
+
+  /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
+     Store immediate overlapping exception return operation might vector to incorrect interrupt. */
+  #if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+  #endif
+}
+
 
 int main(void)
 {
@@ -67,7 +85,7 @@ int main(void)
 	status = VL53L1X_SetDistanceMode(dev, 2); /* 1=short, 2=long */
 	status = VL53L1X_SetTimingBudgetInMs(dev, 100); /* in ms possible values [20, 50, 100, 200, 500] */
 	status = VL53L1X_SetInterMeasurementInMs(dev, 100); /* in ms, IM must be > = TB */
-	status = VL53L1X_SetInterruptPolarity(dev,0); //This function programs the interrupt polarity, 1 = active high (default), 0 = active low.
+	// status = VL53L1X_SetInterruptPolarity(dev,0); //This function programs the interrupt polarity, 1 = active high (default), 0 = active low.
 
 	PRINTF("VL53L1X Ultra Lite Driver Example running ...\r\n");
 
@@ -75,27 +93,16 @@ int main(void)
 	status = VL53L1X_StartRanging(dev);
 
 	while (1) {
-		// SW polling mode
-		while (dataReady == 0) {
-			status = VL53L1X_CheckForDataReady(dev, &dataReady);
-			timeout_counter++;
-			if (timeout_counter >= 1000)
-			{
-				status = (uint8_t)VL53L1X_ERROR_TIMEOUT;
-				PRINTF("No data ready for long time, please check your system\n");
-				timeout_counter = 0;
-			}
-			status = VL53L1_WaitMs(dev, 1);
+		if(IntCount !=0 ){
+			IntCount=0;
+			status = VL53L1X_GetRangeStatus(dev, &RangeStatus);
+			status = VL53L1X_GetDistance(dev, &Distance);
+			status = VL53L1X_GetSignalRate(dev, &SignalRate);
+			status = VL53L1X_GetAmbientRate(dev, &AmbientRate);
+			status = VL53L1X_GetSpadNb(dev, &SpadNum);
+			status = VL53L1X_ClearInterrupt(dev); /* clear interrupt has to be called to enable next interrupt*/
+			PRINTF("%u, %u, %u, %u, %u\n", RangeStatus, Distance, SignalRate, AmbientRate,SpadNum);
 		}
-		dataReady = 0;
-		timeout_counter = 0;
 
-		status = VL53L1X_GetRangeStatus(dev, &RangeStatus);
-		status = VL53L1X_GetDistance(dev, &Distance);
-		status = VL53L1X_GetSignalRate(dev, &SignalRate);
-		status = VL53L1X_GetAmbientRate(dev, &AmbientRate);
-		status = VL53L1X_GetSpadNb(dev, &SpadNum);
-		status = VL53L1X_ClearInterrupt(dev); /* clear interrupt has to be called to enable next interrupt*/
-		PRINTF("%u, %u, %u, %u, %u\n", RangeStatus, Distance, SignalRate, AmbientRate,SpadNum);
 	}
 }

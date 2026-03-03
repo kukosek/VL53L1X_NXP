@@ -54,11 +54,31 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_DEBUG_SWD_SWO_PIN_MASK (1U << 2U)      /*!<@brief PORT pin mask */
                                                               /* @} */
 
+/*! @name PORT0_31 (coord D7), P0_31/J1[16]
+  @{ */
+
+/* Symbols to be used with GPIO driver */
+#define BOARD_INITPINS_LIDAR_GPIO_GPIO GPIO0                /*!<@brief GPIO peripheral base pointer */
+#define BOARD_INITPINS_LIDAR_GPIO_GPIO_PIN 31U              /*!<@brief GPIO pin number */
+#define BOARD_INITPINS_LIDAR_GPIO_GPIO_PIN_MASK (1U << 31U) /*!<@brief GPIO pin mask */
+
+/* Symbols to be used with PORT driver */
+#define BOARD_INITPINS_LIDAR_GPIO_PORT PORT0                /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITPINS_LIDAR_GPIO_PIN 31U                   /*!<@brief PORT pin number */
+#define BOARD_INITPINS_LIDAR_GPIO_PIN_MASK (1U << 31U)      /*!<@brief PORT pin mask */
+                                                            /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
 void BOARD_InitPins(void);
+
+/*!
+ * @brief Configures pin routing and optionally pin electrical features.
+ *
+ */
+void LIDAR_pins(void);
 
 #if defined(__cplusplus)
 }
