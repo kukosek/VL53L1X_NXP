@@ -1,0 +1,20 @@
+M	.cproject
+A	.default_mex
+A	.~lock.MCXNP184M150F70_Pinout.xlsx#
+A	MCXNP184M150F70_Pinout.xlsx
+A	VL53L1X_NXP LinkServer Debug.launch
+A	board.svg
+M	board/clock_config.c
+M	board/clock_config.h
+A	board/peripherals.c
+A	board/peripherals.h
+M	board/pin_mux.c
+M	board/pin_mux.h
+A	doc/logging.txt
+A	drivers/STSW-IMG009/STSW-IMG009_v3.5.5/API/platform/vl53l1_error_codes.h
+M	drivers/STSW-IMG009/STSW-IMG009_v3.5.5/API/platform/vl53l1_platform.c
+A	drivers/fsl_lpi2c.c
+A	drivers/fsl_lpi2c.h
+A	lidar_driver_dev_mcxn947.mex
+M	source/hello_world.c
+M	startup/startup_mcxn947_cm33_core0.c
