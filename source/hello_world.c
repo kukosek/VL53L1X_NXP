@@ -88,20 +88,43 @@ int main(void)
 	// status = VL53L1X_SetInterruptPolarity(dev,0); //This function programs the interrupt polarity, 1 = active high (default), 0 = active low.
 
 	PRINTF("VL53L1X Ultra Lite Driver Example running ...\r\n");
-
-
 	status = VL53L1X_StartRanging(dev);
 
+	bool isInterrupt = true;
+
 	while (1) {
-		if(IntCount !=0 ){
-			IntCount=0;
+		if (!isInterrupt){	// HW interrupt mode
+			while (dataReady == 0) {
+				status = VL53L1X_CheckForDataReady(dev, &dataReady);
+				timeout_counter++;
+				if (timeout_counter >= 1000) {
+					status = (uint8_t)VL53L1X_ERROR_TIMEOUT;
+					printf("No data ready for long time, please check your system\n");
+					timeout_counter = 0;
+				}
+				status = VL53L1_WaitMs(dev, 1);
+			}
+			dataReady = 0;
+			timeout_counter = 0;
+
 			status = VL53L1X_GetRangeStatus(dev, &RangeStatus);
 			status = VL53L1X_GetDistance(dev, &Distance);
 			status = VL53L1X_GetSignalRate(dev, &SignalRate);
 			status = VL53L1X_GetAmbientRate(dev, &AmbientRate);
 			status = VL53L1X_GetSpadNb(dev, &SpadNum);
 			status = VL53L1X_ClearInterrupt(dev); /* clear interrupt has to be called to enable next interrupt*/
-			PRINTF("%u, %u, %u, %u, %u\n", RangeStatus, Distance, SignalRate, AmbientRate,SpadNum);
+			PRINTF("%u, %u, %u, %u, %u\r\n", RangeStatus, Distance, SignalRate, AmbientRate,SpadNum);
+		} else {
+			if(IntCount !=0 ){
+				IntCount=0;
+				status = VL53L1X_GetRangeStatus(dev, &RangeStatus);
+				status = VL53L1X_GetDistance(dev, &Distance);
+				status = VL53L1X_GetSignalRate(dev, &SignalRate);
+				status = VL53L1X_GetAmbientRate(dev, &AmbientRate);
+				status = VL53L1X_GetSpadNb(dev, &SpadNum);
+				status = VL53L1X_ClearInterrupt(dev); /* clear interrupt has to be called to enable next interrupt*/
+				PRINTF("%u, %u, %u, %u, %u\r\n", RangeStatus, Distance, SignalRate, AmbientRate,SpadNum);
+			}
 		}
 
 	}

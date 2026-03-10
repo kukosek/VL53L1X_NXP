@@ -48,7 +48,7 @@ int _I2CWrite(uint16_t Dev, uint8_t *pdata, uint32_t count) {
 
     LPI2C_MasterStop(LPI2C2);
 
-    return status == kStatus_Success;
+    return status != kStatus_Success;
 }
 
 int _I2CRead(uint16_t Dev, uint8_t *pdata, uint32_t count) {
@@ -68,7 +68,7 @@ int _I2CRead(uint16_t Dev, uint8_t *pdata, uint32_t count) {
 
 	LPI2C_MasterStop(LPI2C2);
 
-	return status == kStatus_Success;
+	return status != kStatus_Success;
 }
 
 int8_t VL53L1_WriteMulti(uint16_t Dev, uint16_t index, uint8_t *pdata, uint32_t count) {
@@ -187,6 +187,7 @@ int8_t VL53L1_RdByte(uint16_t Dev, uint16_t index, uint8_t *data) {
     // VL53L1_GetI2cBus();
     status_int = _I2CWrite(Dev, _I2CBuffer, 2);
     if( status_int ){
+    	PRINTF("Status INT, %d\r\n", status_int);
         Status = VL53L1_ERROR_CONTROL_INTERFACE;
         goto done;
     }

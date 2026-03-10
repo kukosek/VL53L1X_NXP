@@ -657,7 +657,7 @@
                         <setting name="lpi2c_mode" value="master"/>
                         <struct name="clock_configuration">
                            <setting name="clockSource" value="LPFLEXCOMMFunctionClock"/>
-                           <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
+                           <setting name="clockSourceFreq" value="BOARD_BootClockPLL150M"/>
                         </struct>
                         <struct name="master_config">
                            <setting name="enableMaster" value="true"/>
