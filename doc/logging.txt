@@ -1,0 +1,5 @@
+- platform.c
+    - _I2cWrite, _I2CRead
+        - PRINTF ( I2c error on write )
+    - _RdByte
+        - PRINTF ( "Status INT")

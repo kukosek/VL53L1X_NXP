@@ -40,7 +40,7 @@ int _I2CWrite(uint16_t Dev, uint8_t *pdata, uint32_t count) {
 
     status = LPI2C_MasterSend(LPI2C2, pdata, count);
     if (status != kStatus_Success) {
-    	PRINTF("I2C error on write");
+    	PRINTF("LIDAR: I2C error on write\r\n");
         //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
         //XNUCLEO6180XA1_I2C1_Init(&§);
 
@@ -48,7 +48,7 @@ int _I2CWrite(uint16_t Dev, uint8_t *pdata, uint32_t count) {
 
     LPI2C_MasterStop(LPI2C2);
 
-    return status != kStatus_Success;
+    return status;
 }
 
 int _I2CRead(uint16_t Dev, uint8_t *pdata, uint32_t count) {
@@ -61,14 +61,14 @@ int _I2CRead(uint16_t Dev, uint8_t *pdata, uint32_t count) {
     status = LPI2C_MasterReceive(LPI2C2, pdata, count);
 
 	if (status != kStatus_Success) {
-		PRINTF("I2C error on read");
+		PRINTF("LIDAR: I2C error on read\r\n");
 		//VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
 		//XNUCLEO6180XA1_I2C1_Init(&hi2c1);
 	}
 
 	LPI2C_MasterStop(LPI2C2);
 
-	return status != kStatus_Success;
+	return status;
 }
 
 int8_t VL53L1_WriteMulti(uint16_t Dev, uint16_t index, uint8_t *pdata, uint32_t count) {
